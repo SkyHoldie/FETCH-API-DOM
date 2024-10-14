@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 120px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Fetch Data from API</h2>
+
+    <!-- Input field for API URL -->
+    <label for="apiUrlInput">API Endpoint URL:</label>
+    <input type="text" id="apiUrlInput" placeholder="Enter API URL">
+    <button id="fetchDataButton">Fetch Data</button>
+
+    <!-- Error message if API fetch fails -->
+    <p id="error-message"></p>
+
+    <!-- Table to display the fetched data -->
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>API Response</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.getElementById('fetchDataButton').addEventListener('click', () => {
+        const apiUrl = document.getElementById('apiUrlInput').value;
+        const tableBody = document.querySelector('#data-table tbody');
+        const errorMessage = document.getElementById('error-message');
+
+        // Clear previous data and error message
+        tableBody.innerHTML = '';
+        errorMessage.textContent = '';
+
+        // Check if the API URL is empty
+        if (!apiUrl) {
+            errorMessage.textContent = 'Please enter a valid API URL.';
+            return;
+        }
+
+        // Fetch data from the input API URL
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Check if the fetched data is an array
+                if (Array.isArray(data)) {
+                    data.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>Item ${index + 1}</td>
+                            <td>${JSON.stringify(item)}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else if (typeof data === 'object') {
+                    // If the fetched data is an object, display each key-value pair
+                    Object.keys(data).forEach(key => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${key}</td>
+                            <td>${JSON.stringify(data[key])}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    errorMessage.textContent = 'Unsupported data format.';
+                }
+            })
+            .catch(error => {
+                errorMessage.textContent = 'Error fetching data: ' + error.message;
+            });
+    });
+</script>
+
+</body>
+</html>
